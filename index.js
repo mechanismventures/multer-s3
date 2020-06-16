@@ -27,13 +27,14 @@ function defaultKey (req, file, cb) {
 }
 
 function autoContentType (req, file, cb) {
-  file.stream.once('data', function (firstChunk) {
-    var type = fileType(firstChunk)
+  file.stream.once('data', async function (firstChunk) {
+    var type = await fileType.fromBuffer(firstChunk)
+    var svg = isSvg(firstChunk)
     var mime
 
-    if (type) {
+    if (type && !svg) {
       mime = type.mime
-    } else if (isSvg(firstChunk)) {
+    } else if (svg) {
       mime = 'image/svg+xml'
     } else {
       mime = 'application/octet-stream'
